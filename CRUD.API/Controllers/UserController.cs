@@ -69,11 +69,13 @@ public class UserController : ControllerBase
         var nickName = User.Identity.Name;
 
         var existingUser = await _repository.GetByNickNameAsync(nickName);
-        if (existingUser == null) return NotFound();
+
+        if (!await _repository.ValidateUser(userRequest.NickName))
+            return BadRequest("User with this nickname already exists.");
 
         var user = _mapper.Map(userRequest, existingUser);
-        await _repository.UpdateAsync(user);
-        return Ok();
+        await _repository.UpdateAsync(user, nickName);
+        return Ok(user);
     }
 
     [Authorize]

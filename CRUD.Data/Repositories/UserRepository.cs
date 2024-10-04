@@ -21,6 +21,12 @@ public class UserRepository : IUserRepository
         return !users.Any(e => e.NickName == user.NickName);
     }
 
+    public async Task<bool> ValidateUser(string nickName)
+    {
+        var users = await GetAllAsync();
+        return !users.Any(e => e.NickName == nickName);
+    }
+
     public async Task<List<User>> GetAllAsync()
     {
         if (!File.Exists(_filePath))
@@ -40,16 +46,16 @@ public class UserRepository : IUserRepository
         return users.FirstOrDefault(e => e.NickName == nickname);
     }
 
-    public async Task UpdateAsync(User user)
+    public async Task UpdateAsync(User user, string prevNickName)
     {
         var users = await GetAllAsync();
-        var existingEntity = users.FirstOrDefault(e => e.NickName == user.NickName);
+        var existingEntity = users.FirstOrDefault(e => e.NickName == prevNickName);
         if (existingEntity != null)
         {
             existingEntity.NickName = user.NickName;
             existingEntity.Name = user.Name;
             existingEntity.Age = user.Age;
-            existingEntity.FriendsNickName = user.FriendsNickName;           
+            existingEntity.Password = BCrypt.Net.BCrypt.HashPassword(user.Password);           
             existingEntity.FriendsNickName = user.FriendsNickName;
             await SaveAllAsync(users);
         }
