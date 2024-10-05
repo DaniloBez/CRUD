@@ -8,12 +8,10 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
+
 builder.Services.AddControllers();
-
 builder.Services.AddScoped<TokenService>();
-
 builder.Services.AddScoped<IUserRepository, UserRepository>();
-
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
 builder.Services.AddAuthentication(options =>
