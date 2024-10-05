@@ -46,7 +46,7 @@ public class UserRepository : IUserRepository
         return users.FirstOrDefault(e => e.NickName == nickname);
     }
 
-    public async Task UpdateAsync(User user, string prevNickName)
+    public async Task<User> UpdateAsync(User user, string prevNickName)
     {
         var users = await GetAllAsync();
         var existingEntity = users.FirstOrDefault(e => e.NickName == prevNickName);
@@ -58,7 +58,9 @@ public class UserRepository : IUserRepository
             existingEntity.Password = BCrypt.Net.BCrypt.HashPassword(user.Password);           
             existingEntity.FriendsNickName = user.FriendsNickName;
             await SaveAllAsync(users);
+            return existingEntity;
         }
+        return null;
     }
 
     public async Task DeleteAsync(string nickName)
@@ -76,8 +78,13 @@ public class UserRepository : IUserRepository
 
     private async Task SaveAllAsync(List<User> users)
     {
+        var directoryPath = Path.GetDirectoryName(_filePath);
+        if (directoryPath != null && !Directory.Exists(directoryPath))
+            Directory.CreateDirectory(directoryPath);
+
         var json = JsonSerializer.Serialize(users);
         await File.WriteAllTextAsync(_filePath, json);
         Console.WriteLine(_filePath);
     }
+
 }

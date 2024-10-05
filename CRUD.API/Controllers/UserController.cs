@@ -1,5 +1,6 @@
 using AutoMapper;
 using CRUD.API.DTOs;
+using CRUD.API.Services;
 using CRUD.Data.Models;
 using CRUD.Data.Repositories.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -12,12 +13,14 @@ public class UserController : ControllerBase
     private readonly IUserRepository _repository;
     private readonly IMapper _mapper;
     private readonly ILogger<UserController> _logger;
+    private readonly TokenService _tokenService;
 
-    public UserController(ILogger<UserController> logger, IUserRepository repository, IMapper mapper)
+    public UserController(ILogger<UserController> logger, IUserRepository repository, IMapper mapper, TokenService tokenService)
     {
         _repository = repository;
         _mapper = mapper;
         _logger = logger;
+        _tokenService = tokenService;
     }
 
     [HttpGet(Name = "GetUsers")]
@@ -69,13 +72,20 @@ public class UserController : ControllerBase
         var nickName = User.Identity.Name;
 
         var existingUser = await _repository.GetByNickNameAsync(nickName);
+        if (existingUser == null) return NotFound();
 
         if (!await _repository.ValidateUser(userRequest.NickName))
             return BadRequest("User with this nickname already exists.");
 
         var user = _mapper.Map(userRequest, existingUser);
-        await _repository.UpdateAsync(user, nickName);
-        return Ok(user);
+
+        var updatedUser = await _repository.UpdateAsync(user, nickName);
+
+        if (updatedUser == null) return NotFound();
+
+        var newToken = _tokenService.GenerateToken(updatedUser.NickName);
+
+        return Ok(new { Token = newToken });
     }
 
     [Authorize]
