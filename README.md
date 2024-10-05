@@ -21,11 +21,11 @@ dotnet restore
 
 Крок 4: Запуск проекту
 Запустіть API сервер за допомогою команди:
-dotnet run
+dotnet run --project CRUD.API/CRUD.API.csproj
 
 Крок 5: Перевірка Swagger документації
 Відкрийте браузер і перейдіть за адресою:
-https://localhost:7232/swagger/index.html
+https://localhost:5108/swagger/index.html
 
 
 Опис функціоналу API
