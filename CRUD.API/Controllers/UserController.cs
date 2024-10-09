@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 [ApiController]
-[Route("[controller]")]
+[Route("api/[controller]")]
 public class UserController : ControllerBase
 {
     private readonly IUserRepository _repository;
@@ -32,7 +32,7 @@ public class UserController : ControllerBase
     }
 
     [Authorize]
-    [HttpGet("{nickName}")]
+    [HttpGet("nickName")]
     public async Task<IActionResult> GetByNickName(string nickName)
     {
         var user = await _repository.GetByNickNameAsync(nickName);
@@ -50,42 +50,26 @@ public class UserController : ControllerBase
 
         string hashedPassword = BCrypt.Net.BCrypt.HashPassword(userRequest.Password);
 
-        var newUser = new User
-        {
-            NickName = userRequest.NickName,
-            Name = userRequest.Name,
-            Age = userRequest.Age,
-            Password = hashedPassword,
-            FriendsNickName = userRequest.FriendsNickName
-        };
+        user.Password = hashedPassword;
 
-        await _repository.AddAsync(newUser);
+        await _repository.AddAsync(user);
 
-        var userResponse = _mapper.Map<UserResponse>(newUser);
-        return CreatedAtAction(nameof(GetByNickName), new { nickName = newUser.NickName }, newUser);
+        var userResponse = _mapper.Map<UserResponse>(user);
+        return CreatedAtAction(nameof(GetByNickName), new { nickName = user.NickName }, user);
     }
 
     [Authorize]
     [HttpPut]
-    public async Task<IActionResult> Update(CreateUserRequest userRequest)
+    public async Task<IActionResult> Update(UpdateUserRequest userRequest)
     {
-        var nickName = User.Identity.Name;
+        var user = _mapper.Map<User>(userRequest);
 
-        var existingUser = await _repository.GetByNickNameAsync(nickName);
-        if (existingUser == null) return NotFound();
+        user.NickName = User.Identity.Name;
 
-        if (!await _repository.ValidateUser(userRequest.NickName))
-            return BadRequest("User with this nickname already exists.");
-
-        var user = _mapper.Map(userRequest, existingUser);
-
-        var updatedUser = await _repository.UpdateAsync(user, nickName);
-
+        var updatedUser = await _repository.UpdateAsync(user);
         if (updatedUser == null) return NotFound();
 
-        var newToken = _tokenService.GenerateToken(updatedUser.NickName);
-
-        return Ok(new { Token = newToken });
+        return Ok(updatedUser);
     }
 
     [Authorize]

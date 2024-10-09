@@ -46,13 +46,12 @@ public class UserRepository : IUserRepository
         return users.FirstOrDefault(e => e.NickName == nickname);
     }
 
-    public async Task<User> UpdateAsync(User user, string prevNickName)
+    public async Task<User> UpdateAsync(User user)
     {
         var users = await GetAllAsync();
-        var existingEntity = users.FirstOrDefault(e => e.NickName == prevNickName);
+        var existingEntity = users.FirstOrDefault(e => e.NickName == user.NickName);
         if (existingEntity != null)
         {
-            existingEntity.NickName = user.NickName;
             existingEntity.Name = user.Name;
             existingEntity.Age = user.Age;
             existingEntity.Password = BCrypt.Net.BCrypt.HashPassword(user.Password);           
