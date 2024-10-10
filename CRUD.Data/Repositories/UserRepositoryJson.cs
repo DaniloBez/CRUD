@@ -4,7 +4,7 @@ using System.Text.Json;
 
 namespace CRUD.Data.Repositories;
 
-public class UserRepository : IUserRepository
+public class UserRepositoryJson : IUserRepository
 {
     private readonly string _filePath = Path.Combine(AppContext.BaseDirectory, "Data", "UsersData.json");
 

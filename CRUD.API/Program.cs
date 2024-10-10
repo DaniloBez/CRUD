@@ -1,7 +1,9 @@
 using CRUD.API.Services;
+using CRUD.Data.Data;
 using CRUD.Data.Repositories;
 using CRUD.Data.Repositories.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
@@ -11,7 +13,9 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 builder.Services.AddScoped<TokenService>();
-builder.Services.AddScoped<IUserRepository, UserRepository>();
+//builder.Services.AddScoped<IUserRepository, UserRepositoryJson>();
+builder.Services.AddDbContext<AppDbContext>();
+builder.Services.AddScoped<IUserRepository, UserRepositorySQL>();
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
 builder.Services.AddAuthentication(options =>

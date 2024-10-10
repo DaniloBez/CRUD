@@ -8,8 +8,6 @@ namespace CRUD.API.Mappings
     {
         public UserProfile()
         {
-            //CreateMap<User, CreateUserRequest>();
-
             CreateMap<User, UserResponse>();
 
             CreateMap<CreateUserRequest, User>();
