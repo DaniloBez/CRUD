@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace CRUD.API.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/authentication")]
 public class AuthController : ControllerBase
 {
     private readonly TokenService _tokenService;

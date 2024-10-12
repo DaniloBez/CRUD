@@ -4,12 +4,11 @@ using CRUD.Data.Models;
 using CRUD.Data.Repositories.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Xml.Linq;
 
 namespace CRUD.API.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/user")]
 public class UserController : ControllerBase
 {
     private readonly IUserRepository _repository;
@@ -22,7 +21,7 @@ public class UserController : ControllerBase
     }
 
     [AllowAnonymous]
-    [HttpGet("get-users")]
+    [HttpGet]
     public async Task<IActionResult> GetAsync()
     {
         var users = await _repository.GetAllAsync();
@@ -31,7 +30,7 @@ public class UserController : ControllerBase
     }
 
     [Authorize]
-    [HttpGet("get-by-nick-name")]
+    [HttpGet("nickname")]
     public async Task<IActionResult> GetByNickName(string nickName)
     {
         var user = await _repository.GetByNickNameAsync(nickName);
@@ -42,7 +41,7 @@ public class UserController : ControllerBase
     }
 
     [AllowAnonymous]
-    [HttpPost("create")]
+    [HttpPost]
     public async Task<IActionResult> Create(CreateUserRequest userRequest)
     {
         var user = _mapper.Map<User>(userRequest);
@@ -59,7 +58,7 @@ public class UserController : ControllerBase
     }
 
     [Authorize]
-    [HttpPut("update")]
+    [HttpPut]
     public async Task<IActionResult> Update(UpdateUserRequest userRequest)
     {
         var user = _mapper.Map<User>(userRequest);
@@ -73,7 +72,7 @@ public class UserController : ControllerBase
     }
 
     [Authorize]
-    [HttpDelete("delete")]
+    [HttpDelete]  
     public async Task<IActionResult> Delete()
     {
         var nickName = User.Identity.Name;
