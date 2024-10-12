@@ -1,6 +1,7 @@
 ﻿using CRUD.API.DTOs;
 using CRUD.API.Services;
 using CRUD.Data.Repositories.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CRUD.API.Controllers;
@@ -18,6 +19,7 @@ public class AuthController : ControllerBase
         _repository = repository;
     }
 
+    [AllowAnonymous]
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginRequest request)
     {

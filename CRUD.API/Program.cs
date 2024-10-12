@@ -1,9 +1,9 @@
 using CRUD.API.Services;
+using CRUD.API.Swagger;
 using CRUD.Data.Data;
 using CRUD.Data.Repositories;
 using CRUD.Data.Repositories.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
@@ -13,9 +13,18 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 builder.Services.AddScoped<TokenService>();
-//builder.Services.AddScoped<IUserRepository, UserRepositoryJson>();
-builder.Services.AddDbContext<AppDbContext>();
-builder.Services.AddScoped<IUserRepository, UserRepositorySQL>();
+
+var repositoryType = builder.Configuration.GetValue<string>("RepositoryType");
+
+if (repositoryType == "SQL")
+{
+    builder.Services.AddDbContext<AppDbContext>();
+    builder.Services.AddScoped<IUserRepository, UserRepositorySQL>();
+}
+else
+    builder.Services.AddScoped<IUserRepository, UserRepositoryJson>();
+
+
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
 builder.Services.AddAuthentication(options =>
@@ -48,23 +57,11 @@ builder.Services.AddSwaggerGen(c =>
         In = ParameterLocation.Header,
         Description = "Please enter JWT with Bearer into field",
         Name = "Authorization",
-        Type = SecuritySchemeType.ApiKey
+        Type = SecuritySchemeType.ApiKey,
+        Scheme = "Bearer"
     });
 
-    c.AddSecurityRequirement(new OpenApiSecurityRequirement
-    {
-        {
-            new OpenApiSecurityScheme
-            {
-                Reference = new OpenApiReference
-                {
-                    Type = ReferenceType.SecurityScheme,
-                    Id = "Bearer"
-                }
-            },
-            new string[] {}
-        }
-    });
+    c.OperationFilter<SecurityRequirementsOperationFilter>();
 });
 
 var app = builder.Build();

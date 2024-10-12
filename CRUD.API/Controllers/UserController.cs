@@ -1,10 +1,12 @@
 using AutoMapper;
 using CRUD.API.DTOs;
-using CRUD.API.Services;
 using CRUD.Data.Models;
 using CRUD.Data.Repositories.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Xml.Linq;
+
+namespace CRUD.API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
@@ -12,18 +14,15 @@ public class UserController : ControllerBase
 {
     private readonly IUserRepository _repository;
     private readonly IMapper _mapper;
-    private readonly ILogger<UserController> _logger;
-    private readonly TokenService _tokenService;
 
-    public UserController(ILogger<UserController> logger, IUserRepository repository, IMapper mapper, TokenService tokenService)
+    public UserController(IUserRepository repository, IMapper mapper)
     {
         _repository = repository;
         _mapper = mapper;
-        _logger = logger;
-        _tokenService = tokenService;
     }
 
-    [HttpGet(Name = "GetUsers")]
+    [AllowAnonymous]
+    [HttpGet("get-users")]
     public async Task<IActionResult> GetAsync()
     {
         var users = await _repository.GetAllAsync();
@@ -32,7 +31,7 @@ public class UserController : ControllerBase
     }
 
     [Authorize]
-    [HttpGet("nickName")]
+    [HttpGet("get-by-nick-name")]
     public async Task<IActionResult> GetByNickName(string nickName)
     {
         var user = await _repository.GetByNickNameAsync(nickName);
@@ -42,7 +41,8 @@ public class UserController : ControllerBase
         return Ok(userResponse);
     }
 
-    [HttpPost]
+    [AllowAnonymous]
+    [HttpPost("create")]
     public async Task<IActionResult> Create(CreateUserRequest userRequest)
     {
         var user = _mapper.Map<User>(userRequest);
@@ -59,7 +59,7 @@ public class UserController : ControllerBase
     }
 
     [Authorize]
-    [HttpPut]
+    [HttpPut("update")]
     public async Task<IActionResult> Update(UpdateUserRequest userRequest)
     {
         var user = _mapper.Map<User>(userRequest);
@@ -73,7 +73,7 @@ public class UserController : ControllerBase
     }
 
     [Authorize]
-    [HttpDelete]
+    [HttpDelete("delete")]
     public async Task<IActionResult> Delete()
     {
         var nickName = User.Identity.Name;
